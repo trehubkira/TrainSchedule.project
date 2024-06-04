@@ -1,0 +1,163 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Route</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/routes/create">Маршрути</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/stations/create">Станції</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/trains/create">Потяги</a>
+            </li>
+            <li class="nav-item">
+                <form class="form-inline my-2 my-lg-0" th:action="@{/logout}" method="post">
+                    <button class="btn btn-outline-danger" type="submit">Sign Out</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h2>Create Route</h2>
+    <form th:action="@{/admin/api/routes/create}" method="post" th:object="${routeForm}">
+        <div class="form-group">
+            <label for="departureStationId">Departure Station:</label>
+            <select class="form-control" id="departureStationId" name="departureStationId" th:field="*{departureStationId}">
+                <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="arrivalStationId">Arrival Station:</label>
+            <select class="form-control" id="arrivalStationId" name="arrivalStationId" th:field="*{arrivalStationId}">
+                <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="trainId">Train:</label>
+            <select class="form-control" id="trainId" name="trainId" th:field="*{trainId}">
+                <option th:each="train : ${trains}" th:value="${train.id}" th:text="${train.code}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="start">Start:</label>
+            <input type="datetime-local" class="form-control" id="start" name="start" th:field="*{start}">
+        </div>
+        <div class="form-group">
+            <label for="end">End:</label>
+            <input type="datetime-local" class="form-control" id="end" name="end" th:field="*{end}">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Route</button>
+    </form>
+
+    <h2>All Routes</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Departure Station</th>
+            <th>Arrival Station</th>
+            <th>Train</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="route : ${routes}">
+            <td class="route-id" th:text="${route.id}" style="display: none;"></td>
+            <td th:text="${route.departureStation.name}"></td>
+            <td th:text="${route.arrivalStation.name}"></td>
+            <td th:text="${route.train.code}"></td>
+            <td th:text="${#dates.format(route.start, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${#dates.format(route.end, 'yyyy-MM-dd HH:mm')}"></td>
+            <td>
+                <button type="button" class="btn btn-primary edit-route-btn" data-toggle="modal" data-target="#editRouteModal" data-route-id="${route.id}">Edit</button>
+            </td>
+            <td>
+                <form th:action="@{/admin/api/routes/delete/{id}(id=${route.id})}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="editRouteModal" tabindex="-1" role="dialog" aria-labelledby="editRouteLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRouteLabel">Edit Route</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editRouteForm" method="post" th:object="${routeForm}">
+                    <div class="form-group">
+                        <label for="editDepartureStationId">Departure Station:</label>
+                        <select class="form-control" id="editDepartureStationId" name="departureStationId" th:field="*{departureStationId}">
+                            <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editArrivalStationId">Arrival Station:</label>
+                        <select class="form-control" id="editArrivalStationId" name="arrivalStationId" th:field="*{arrivalStationId}">
+                            <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTrainId">Train:</label>
+                        <select class="form-control" id="editTrainId" name="trainId" th:field="*{trainId}">
+                            <option th:each="train : ${trains}" th:value="${train.id}" th:text="${train.code}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStart">Start:</label>
+                        <input type="datetime-local" class="form-control" id="editStart" name="start" th:field="*{start}">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEnd">End:</label>
+                        <input type="datetime-local" class="form-control" id="editEnd" name="end" th:field="*{end}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    $(document).ready(function() {
+        $('.edit-route-btn').click(function() {
+            const routeId = $(this).closest('tr').find('.route-id').text();
+            const modal = $('#editRouteModal');
+            const form = $('#editRouteForm');
+            const actionUrl = '/admin/api/routes/update/' + routeId;
+            form.attr('action', actionUrl);
+            modal.find('.modal-title').text('Edit Route ' + routeId);
+            modal.modal('show');
+        });
+    });
+</script>
+
+
+</body>
+</html>
